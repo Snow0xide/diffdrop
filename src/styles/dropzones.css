@@ -1,0 +1,288 @@
+/* Drop zones A and B: full size before a comparison, a header during one. */
+
+.zones {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 18px;
+}
+
+.zone {
+  position: relative;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 24px;
+  border: 1.5px dashed var(--zone-border);
+  border-radius: 14px;
+  background: var(--zone-bg);
+  text-align: center;
+  transition: border-color 0.18s, background-color 0.18s, transform 0.18s ease, box-shadow 0.18s;
+}
+
+.zone:hover {
+  border-color: var(--label-3);
+}
+
+.zone[data-hover] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  transform: scale(1.012);
+}
+
+.zone[data-state="filled"],
+.zone[data-state="error"] {
+  border-style: solid;
+  border-color: var(--separator);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.zone[data-state="filled"][data-hover] {
+  border-color: var(--accent);
+}
+
+.zone-icon {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 10px;
+  border-radius: 16px;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  animation: float 3.2s ease-in-out infinite;
+}
+
+.zone[data-hover] .zone-icon {
+  animation: hop 0.7s ease-in-out infinite;
+}
+
+.zone[data-state="filled"] .zone-icon {
+  color: var(--label-2);
+  background: var(--control);
+  animation: none;
+}
+
+.zone[data-state="error"] .zone-icon {
+  color: var(--red);
+  background: color-mix(in srgb, var(--red) 12%, transparent);
+  animation: none;
+}
+
+.zone-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--badge-fg);
+  background: var(--badge-bg);
+}
+
+.zone-hint {
+  margin-top: 6px;
+  font-size: 15px;
+}
+
+.zone-sub {
+  font-size: 12px;
+  color: var(--label-2);
+}
+
+.zone-name,
+.zone-path {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zone-name {
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.zone-path {
+  font-size: 11.5px;
+  color: var(--label-2);
+}
+
+.zone-error {
+  max-width: 34ch;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--red);
+}
+
+.zone-drop {
+  min-height: 1.3em;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+/* Two files dragged together: one message for both zones. */
+.zones:not(.compact)[data-drop-hint]:not([data-drop-hint=""])::after {
+  content: attr(data-drop-hint);
+  position: absolute;
+  left: 50%;
+  bottom: 32px;
+  transform: translateX(-50%);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: #fff;
+  background: var(--accent);
+  box-shadow: var(--shadow);
+  animation: fade-in 0.15s ease-out;
+}
+
+@keyframes float {
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes hop {
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* Header above the diff. */
+
+.zones.compact {
+  flex: none;
+  gap: 0;
+  padding: 0;
+  border-bottom: 1px solid var(--separator);
+  background: var(--header-bg);
+}
+
+.zones.compact .zone {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 8px;
+  height: 32px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+  text-align: left;
+}
+
+.zones.compact .zone + .zone {
+  border-left: 1px solid var(--separator);
+}
+
+.zones.compact .zone:hover {
+  background: var(--control);
+}
+
+.zones.compact .zone-icon {
+  width: auto;
+  height: auto;
+  margin: 0;
+  background: none;
+  color: var(--label-2);
+  animation: none;
+}
+
+.zones.compact .zone-title,
+.zones.compact .zone-hint,
+.zones.compact .zone-sub,
+.zones.compact .zone-error,
+.zones.compact .zone-drop {
+  display: none;
+}
+
+.zones.compact .zone-name {
+  flex: none;
+  max-width: 50%;
+  margin: 0;
+  font-size: 12px;
+}
+
+.zones.compact .zone-path {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+}
+
+/* Dragging over the diff: each half of the window is a target. */
+
+.drop-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 12px;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--content-bg) 85%, transparent);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  animation: fade-in 0.15s ease-out;
+}
+
+.drop-overlay > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 2px dashed var(--label-3);
+  border-radius: 14px;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.drop-overlay > div.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.drop-overlay .badge {
+  min-width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  font-size: 15px;
+}
+
+.drop-overlay .active .badge {
+  background: var(--accent);
+  color: #fff;
+}
+
+.drop-text {
+  font-weight: 600;
+}
+
+.drop-file {
+  font-size: 12px;
+  color: var(--label-2);
+}

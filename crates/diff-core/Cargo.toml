@@ -1,0 +1,11 @@
+[package]
+name = "diff-core"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+description = "Line and word diff engine for diffdrop"
+
+[dependencies]
+similar = "3.2"
+encoding_rs = "0.8"
+serde = { version = "1", features = ["derive"] }

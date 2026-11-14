@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <title>diffdrop</title>
+    <link rel="stylesheet" href="/src/styles/base.css" />
+    <link rel="stylesheet" href="/src/styles/toolbar.css" />
+    <link rel="stylesheet" href="/src/styles/dropzones.css" />
+    <link rel="stylesheet" href="/src/styles/diff.css" />
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+  <body>
+    <header class="toolbar" data-tauri-drag-region>
+      <div class="toolbar-group" data-tauri-drag-region>
+        <button class="tool" id="swap" data-i18n-title="toolbar.swap" data-icon="ArrowLeftRight"></button>
+        <button class="tool" id="reset" data-i18n-title="toolbar.reset" data-icon="RotateCcw"></button>
+      </div>
+      <div class="toolbar-group toolbar-center" data-tauri-drag-region>
+        <div class="segmented" role="radiogroup">
+          <button role="radio" data-view="split" data-i18n-title="toolbar.split" data-icon="Columns2"></button>
+          <button role="radio" data-view="unified" data-i18n-title="toolbar.unified" data-icon="Rows2"></button>
+        </div>
+        <button class="toggle" id="ignore-whitespace" aria-pressed="false" data-icon="Space">
+          <span data-i18n="toolbar.ignoreWhitespace"></span>
+        </button>
+        <button class="toggle" id="only-changes" aria-pressed="false" data-icon="FoldVertical">
+          <span data-i18n="toolbar.onlyChanges"></span>
+        </button>
+      </div>
+      <div class="toolbar-group" data-tauri-drag-region>
+        <div class="segmented">
+          <button id="prev" data-i18n-title="toolbar.prev" data-icon="ChevronUp"></button>
+          <button id="next" data-i18n-title="toolbar.next" data-icon="ChevronDown"></button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="zones" id="zones">
+        <button class="zone" data-side="a"></button>
+        <button class="zone" data-side="b"></button>
+      </section>
+      <section class="diff" id="diff" hidden>
+        <div class="diff-scroll" id="diff-scroll" tabindex="0">
+          <div class="diff-canvas" id="diff-canvas"></div>
+        </div>
+        <div class="diff-empty" id="diff-empty" data-i18n="stats.same" hidden></div>
+        <div class="hbars" id="hbars"></div>
+      </section>
+      <div class="drop-overlay" id="drop-overlay" hidden>
+        <div data-side="a"></div>
+        <div data-side="b"></div>
+      </div>
+    </main>
+
+    <footer class="statusbar" id="statusbar"></footer>
+  </body>
+</html>

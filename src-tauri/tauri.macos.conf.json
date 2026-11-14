@@ -1,0 +1,20 @@
+{
+  "bundle": {
+    "targets": ["app", "dmg"],
+    "macOS": {
+      "minimumSystemVersion": "11.0",
+      "hardenedRuntime": true,
+      "entitlements": "Entitlements.plist",
+      "signingIdentity": null
+    },
+    "fileAssociations": [
+      {
+        "ext": [],
+        "name": "Document",
+        "contentTypes": ["public.text", "public.data"],
+        "role": "Viewer",
+        "rank": "Alternate"
+      }
+    ]
+  }
+}

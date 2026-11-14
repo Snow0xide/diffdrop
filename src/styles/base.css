@@ -1,0 +1,156 @@
+/* Tokens, themes and platform fonts. */
+
+:root {
+  color-scheme: light dark;
+
+  --accent: #007aff;
+  --red: #ff3b30;
+  --green: #28cd41;
+  --orange: #ff9500;
+
+  --window-bg: #ececec;
+  --content-bg: #ffffff;
+  --surface: rgba(255, 255, 255, 0.72);
+  --label: rgba(0, 0, 0, 0.85);
+  --label-2: rgba(0, 0, 0, 0.5);
+  --label-3: rgba(0, 0, 0, 0.26);
+  --separator: rgba(0, 0, 0, 0.1);
+  --control: rgba(0, 0, 0, 0.055);
+  --control-hover: rgba(0, 0, 0, 0.075);
+  --control-active: rgba(0, 0, 0, 0.12);
+  --selected: #ffffff;
+  --selected-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
+  --zone-bg: rgba(255, 255, 255, 0.4);
+  --zone-border: rgba(0, 0, 0, 0.18);
+  --badge-bg: rgba(0, 0, 0, 0.55);
+  --badge-fg: #ffffff;
+  --header-bg: #f7f7f7;
+  --gutter-bg: rgba(0, 0, 0, 0.025);
+  --fold-bg: rgba(0, 0, 0, 0.035);
+
+  --font-ui: system-ui, sans-serif;
+  --font-code: ui-monospace, monospace;
+}
+
+@supports (color: AccentColor) {
+  :root {
+    --accent: AccentColor;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --red: #ff453a;
+    --green: #32d74b;
+    --orange: #ff9f0a;
+
+    --window-bg: #2b2b2b;
+    --content-bg: #1e1e1e;
+    --surface: rgba(255, 255, 255, 0.06);
+    --label: rgba(255, 255, 255, 0.86);
+    --label-2: rgba(255, 255, 255, 0.55);
+    --label-3: rgba(255, 255, 255, 0.25);
+    --separator: rgba(255, 255, 255, 0.1);
+    --control: rgba(255, 255, 255, 0.08);
+    --control-hover: rgba(255, 255, 255, 0.11);
+    --control-active: rgba(255, 255, 255, 0.16);
+    --selected: rgba(255, 255, 255, 0.22);
+    --selected-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+    --zone-bg: rgba(255, 255, 255, 0.03);
+    --zone-border: rgba(255, 255, 255, 0.2);
+    --badge-bg: rgba(255, 255, 255, 0.7);
+    --badge-fg: #1e1e1e;
+    --header-bg: #262626;
+    --gutter-bg: rgba(255, 255, 255, 0.025);
+    --fold-bg: rgba(255, 255, 255, 0.04);
+  }
+}
+
+/* Apple's system fonts on macOS only; Segoe on Windows. */
+body[data-os="macos"] {
+  --font-ui: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-code: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+body[data-os="windows"] {
+  --font-ui: "Segoe UI Variable Text", "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --font-code: "Cascadia Mono", Consolas, monospace;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font: 13px/1.35 var(--font-ui);
+  color: var(--label);
+  background: var(--window-bg);
+  -webkit-font-smoothing: antialiased;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: default;
+}
+
+/* Vibrancy or Mica shows through. */
+body[data-effects="true"] {
+  background: transparent;
+}
+
+main {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: default;
+}
+
+button:disabled {
+  opacity: 0.35;
+}
+
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 50%, transparent);
+  outline-offset: 1px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

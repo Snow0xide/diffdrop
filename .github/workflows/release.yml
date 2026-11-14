@@ -1,0 +1,113 @@
+# Builds the installers when a GitHub release is published and attaches them
+# to it: a universal .dmg (Apple Silicon + Intel) and an NSIS installer for
+# Windows. Signing is optional and turns on when the secrets below exist.
+#
+# macOS (Developer ID certificate, notarization with an Apple ID):
+#   APPLE_CERTIFICATE           base64 of the exported .p12
+#   APPLE_CERTIFICATE_PASSWORD  password of the .p12
+#   APPLE_SIGNING_IDENTITY      e.g. "Developer ID Application: Name (TEAMID)"
+#   APPLE_ID, APPLE_PASSWORD    Apple ID and an app-specific password
+#   APPLE_TEAM_ID               Team ID
+#   KEYCHAIN_PASSWORD           any password for the temporary keychain
+#
+# Windows (code signing certificate):
+#   WINDOWS_CERTIFICATE           base64 of the .pfx
+#   WINDOWS_CERTIFICATE_PASSWORD  password of the .pfx
+
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            args: --target universal-apple-darwin
+          - platform: windows-latest
+            args: ""
+    runs-on: ${{ matrix.platform }}
+    env:
+      SIGN_MACOS: ${{ secrets.APPLE_CERTIFICATE != '' }}
+      SIGN_WINDOWS: ${{ secrets.WINDOWS_CERTIFICATE != '' }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ runner.os == 'macOS' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - uses: Swatinem/rust-cache@v2
+
+      - run: npm ci
+
+      - name: Import the Apple certificate
+        if: runner.os == 'macOS' && env.SIGN_MACOS == 'true'
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+        run: |
+          echo "$APPLE_CERTIFICATE" | base64 --decode > certificate.p12
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+          rm certificate.p12
+
+      - name: Import the Windows certificate
+        if: runner.os == 'Windows' && env.SIGN_WINDOWS == 'true'
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: |
+          $pfx = Join-Path $env:RUNNER_TEMP "certificate.pfx"
+          [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE))
+          $password = ConvertTo-SecureString -String $env:WINDOWS_CERTIFICATE_PASSWORD -Force -AsPlainText
+          $cert = Import-PfxCertificate -FilePath $pfx -CertStoreLocation Cert:\CurrentUser\My -Password $password
+          Remove-Item $pfx
+          # Point the bundler at the imported certificate.
+          $config = Get-Content src-tauri/tauri.windows.conf.json -Raw | ConvertFrom-Json
+          $config.bundle.windows.certificateThumbprint = $cert.Thumbprint
+          $config.bundle.windows | Add-Member -Force timestampUrl "http://timestamp.digicert.com"
+          $config | ConvertTo-Json -Depth 10 | Set-Content src-tauri/tauri.windows.conf.json
+
+      - name: Build and upload (signed and notarized)
+        if: runner.os == 'macOS' && env.SIGN_MACOS == 'true'
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        with:
+          releaseId: ${{ github.event.release.id }}
+          tagName: ${{ github.event.release.tag_name }}
+          args: ${{ matrix.args }}
+
+      - name: Build and upload
+        if: runner.os != 'macOS' || env.SIGN_MACOS != 'true'
+        uses: tauri-apps/tauri-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          releaseId: ${{ github.event.release.id }}
+          tagName: ${{ github.event.release.tag_name }}
+          args: ${{ matrix.args }}

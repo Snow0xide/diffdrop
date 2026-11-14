@@ -1,0 +1,193 @@
+/* Virtualized diff rows. Every row is ROW_HEIGHT (20px) tall. */
+
+.diff {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--content-bg);
+  animation: fade-in 0.18s ease-out;
+
+  --del-bg: color-mix(in srgb, var(--red) 10%, transparent);
+  --del-word: color-mix(in srgb, var(--red) 28%, transparent);
+  --ins-bg: color-mix(in srgb, var(--green) 12%, transparent);
+  --ins-word: color-mix(in srgb, var(--green) 32%, transparent);
+  --filler: repeating-linear-gradient(
+    -45deg,
+    transparent 0 5px,
+    var(--gutter-bg) 5px 6px
+  );
+}
+
+.diff-scroll {
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-user-select: text;
+  user-select: text;
+  cursor: text;
+}
+
+.diff-canvas {
+  --sx: 0px;
+  --gutter: 48px;
+  position: relative;
+  font: 12px/20px var(--font-code);
+  font-variant-ligatures: none;
+}
+
+.measure {
+  position: absolute;
+  visibility: hidden;
+  white-space: pre;
+}
+
+.row {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  display: grid;
+  grid-template-columns: var(--gutter) minmax(0, 1fr) var(--gutter) minmax(0, 1fr);
+}
+
+.unified .row {
+  grid-template-columns: var(--gutter) var(--gutter) 18px minmax(0, 1fr);
+}
+
+.num {
+  padding-right: 8px;
+  text-align: right;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--label-3);
+  background: var(--gutter-bg);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.num.side-b {
+  border-left: 1px solid var(--separator);
+}
+
+.code {
+  overflow: hidden;
+  padding-left: 8px;
+  white-space: pre;
+  tab-size: 4;
+}
+
+.text {
+  display: inline-block;
+  transform: translateX(calc(var(--sx) * -1));
+}
+
+.sign {
+  text-align: center;
+  color: var(--label-2);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.k-del .side-a,
+.k-mod .side-a,
+.unified .k-del {
+  background: var(--del-bg);
+}
+
+.k-ins .side-b,
+.k-mod .side-b,
+.unified .k-ins {
+  background: var(--ins-bg);
+}
+
+.k-del .side-b,
+.k-ins .side-a {
+  background: var(--filler);
+}
+
+.unified .k-del .sign {
+  color: var(--red);
+}
+
+.unified .k-ins .sign {
+  color: var(--green);
+}
+
+.wd,
+.wi {
+  border-radius: 3px;
+}
+
+.wd {
+  background: var(--del-word);
+}
+
+.wi {
+  background: var(--ins-word);
+}
+
+/* Change reached with next / previous. */
+.row.current > .num:first-child {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.k-fold {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--fold-bg);
+  box-shadow: inset 0 1px 0 var(--separator), inset 0 -1px 0 var(--separator);
+}
+
+.fold-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 16px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 8px;
+  font: 11px var(--font-ui);
+  color: var(--label-2);
+  background: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: background-color 0.12s, color 0.12s;
+}
+
+.fold-button:hover {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.diff-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  color: var(--label-2);
+  pointer-events: none;
+}
+
+.hbars {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.hbar {
+  position: absolute;
+  bottom: 0;
+  height: 12px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.hbar > div {
+  height: 1px;
+}

@@ -1,0 +1,154 @@
+/* Compact toolbar merged with the title bar, and the status bar. */
+
+.toolbar {
+  flex: none;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--separator);
+}
+
+/* Room for the traffic lights, which end at 78px (see lib.rs). */
+body[data-os="macos"] .toolbar {
+  padding-left: 90px;
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toolbar-center {
+  flex: 1;
+  justify-content: center;
+  gap: 10px;
+}
+
+.tool {
+  width: 32px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--label-2);
+  transition: background-color 0.12s, color 0.12s;
+}
+
+.tool:hover:not(:disabled),
+.toggle:hover:not(:disabled) {
+  background: var(--control-hover);
+  color: var(--label);
+}
+
+.tool:active:not(:disabled),
+.toggle:active:not(:disabled) {
+  background: var(--control-active);
+}
+
+.segmented {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 7px;
+  background: var(--control);
+}
+
+.segmented button {
+  width: 30px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--label-2);
+  transition: background-color 0.15s, box-shadow 0.15s, color 0.15s;
+}
+
+.segmented button:hover:not(:disabled) {
+  color: var(--label);
+}
+
+.segmented button:active:not(:disabled) {
+  background: var(--control-active);
+}
+
+.segmented button[aria-checked="true"] {
+  background: var(--selected);
+  color: var(--label);
+  box-shadow: var(--selected-shadow);
+}
+
+.toggle {
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--label-2);
+  font-size: 12px;
+  white-space: nowrap;
+  transition: background-color 0.12s, color 0.12s;
+}
+
+.toggle[aria-pressed="true"],
+.toggle[aria-pressed="true"]:hover {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.statusbar {
+  flex: none;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 12px;
+  border-top: 1px solid var(--separator);
+  font-size: 11.5px;
+  color: var(--label-2);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stat.added::before,
+.stat.removed::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.stat.added::before {
+  background: var(--green);
+}
+
+.stat.removed::before {
+  background: var(--red);
+}
+
+.stat.warning {
+  margin-left: auto;
+  color: var(--orange);
+}
+
+.stat.busy svg {
+  animation: spin 0.9s linear infinite;
+}
